@@ -12,12 +12,25 @@
  modified 19 Jun 2025
  by Matěj Mrkva, based on work by Tom Igoe
 
+
+
+  Librayes needed:
+    Adafruit NeoPixel by Adafruit
+    Ethernet
+    ArduinoHttpClient by Arduino
+    Arduino_JSON by Arduino
+
  */
 
 #include <SPI.h>
 #include <Ethernet.h>
 #include "config.h"
 #include <Adafruit_NeoPixel.h>
+
+
+#ifndef ARDUINO_ARCH_RP2040
+#warning "Code is intended to run on RP2040 architecture or Waveshare RP2040 Zero board"
+#endif
 
 // Initialize the Ethernet client library
 // with the IP address and port of the server
@@ -51,7 +64,7 @@ void setup() {
   // Open serial communications
   Serial.begin(115200);
 
-  Serial.print("Starting MicrotikAPI v1 07/10/2025 by Matěj Mrkva\nURL: https://mars-engineers.cz/ \nemail: matej.mrkva@mars-engineers.cz\n");
+  Serial.print("Starting MicrotikAPI v1 07/10/2025 by Matěj Mrkva\nProject: https://github.com/matej2005/RP2040-MicrotikAPI\nURL: https://mars-engineers.cz/ \nemail: matej.mrkva@mars-engineers.cz\n");
 
   ethernetTryConnect();
 
