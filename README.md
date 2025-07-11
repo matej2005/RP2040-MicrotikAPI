@@ -5,19 +5,20 @@ This project is used to enable / disable firewall rule using RouterOS rest API
 Project is based on RP2040-zero dev board and W5500 ethernet module
 
 ## Building it
-![image info](./img/Schematic.png)
+![Schematic](./img/Schematic.png)
+![Schematic](./img/bot.jpg)
+![Schematic](./img/top.jpg)
 
 ## Enclousure
-				I 3D printed rackmount case for this project
-				<img>
+I 3D printed rackmount case for this project
+![Enclousure](./img/case.jpg)
 
 ## RouterBoard configuration
-
-        1. Login in to your router using WinBox
-        2. Optional: Create Group API in `system/groups` with policy `rest-api`
-        3. In system/users create user for accessing via API with api group created before
-        4. Optional reserve DHCP address for this device and add it under Allowed adresses
-        5. Make sure that in IP/Services WWW is enabled
+1. Login in to your router using WinBox
+2. Optional: Create Group API in `system/groups` with policy `rest-api`
+3. In system/users create user for accessing via API with api group created before
+4. Optional reserve DHCP address for this device and add it under Allowed adresses
+5. Make sure that in IP/Services WWW is enabled
 	
 
 ## Firmware
