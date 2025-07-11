@@ -5,7 +5,7 @@ This project is used to enable / disable firewall rule using RouterOS rest API
 Project is based on RP2040-zero dev board and W5500 ethernet module
 
 ## Building it
-				<schematic>
+![image info](./img/schematic.png)
 
 ## Enclousure
 				I 3D printed rackmount case for this project
