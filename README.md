@@ -20,11 +20,13 @@ I 3D printed rackmount case for this project
 ![Enclousure](./img/case.jpg)
 
 ## RouterBoard configuration
+- **Supported versions > RouterOS v7.1beta4**
 1. Login in to your router using WinBox
 2. Optional: Create Group API in `system/groups` with policy `write, rest-api, read, api`
 3. In system/users create user for accessing via API with api group created before
-4. Optional reserve DHCP address for this device and add it under Allowed adresses
+4. Optional reserve DHCP address for this device and add it under Allowed addresses
 5. Make sure that in IP/Services WWW is enabled
+6. Create firewall rule with some specific name that we will be targeting ex:"GPIO controled port" 
 	
 
 ## Firmware
