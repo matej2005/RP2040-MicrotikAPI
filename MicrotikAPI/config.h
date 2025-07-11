@@ -12,12 +12,12 @@
 
 
 // RouterOS configuration
-char server[] = "172.16.1.1"; // IP of the routerboard
-const uint16_t port = 80;  // Port of http interface
-#define AUTH_USER "api" // Dodělat
-#define AUTH_PASSWD "1234"
-const String targetVariable = "comment";  // Targeted rule by variable
-const String targetVariableValue = "GPIO controled port"; // Targeted rule by variable with value
+char server[] = "172.16.1.1";    // IP of the routerboard
+const uint16_t port = 80;        // Port of http interface
+const String AUTH_USER = "api";
+const String AUTH_PASSWD = "1234";
+const String targetVariable = "comment";                   // Targeted rule by variable
+const String targetVariableValue = "GPIO controled port";  // Targeted rule by variable with value
 
 const String URL_PATH = "/rest/ip/firewall/nat";  // REST url
 
