@@ -4,8 +4,11 @@ This project is used to enable / disable firewall rule using RouterOS rest API
 
 Project is based on RP2040-zero dev board and W5500 ethernet module
 
+Powering via USB-C
+
 ## Building it
 Here is schematic how to connect ethernet module with RP2040
+Sometimes it started happening that ethernet module can´t boot, it was happening most times with long USB cable. I fixed it by adding cappacitor to the 3.3V power.
 ![Schematic](./img/Schematic.png)
 
 I builded it on pice of protoboard
@@ -18,7 +21,7 @@ I 3D printed rackmount case for this project
 
 ## RouterBoard configuration
 1. Login in to your router using WinBox
-2. Optional: Create Group API in `system/groups` with policy `rest-api`
+2. Optional: Create Group API in `system/groups` with policy `write, rest-api, read, api`
 3. In system/users create user for accessing via API with api group created before
 4. Optional reserve DHCP address for this device and add it under Allowed adresses
 5. Make sure that in IP/Services WWW is enabled
