@@ -6,8 +6,9 @@ Project is based on RP2040-zero dev board and W5500 ethernet module
 
 ## Building it
 ![Schematic](./img/Schematic.png)
-![Schematic](./img/bot.jpg)
-![Schematic](./img/top.jpg)
+I builded it on pice of protoboard
+![protoboard top](./img/bot.jpg)
+![protoboard bottom](./img/top.jpg)
 
 ## Enclousure
 I 3D printed rackmount case for this project
