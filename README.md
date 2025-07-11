@@ -5,7 +5,9 @@ This project is used to enable / disable firewall rule using RouterOS rest API
 Project is based on RP2040-zero dev board and W5500 ethernet module
 
 ## Building it
+Here is schematic how to connect ethernet module with RP2040
 ![Schematic](./img/Schematic.png)
+
 I builded it on pice of protoboard
 ![protoboard top](./img/bot.jpg)
 ![protoboard bottom](./img/top.jpg)
@@ -24,19 +26,24 @@ I 3D printed rackmount case for this project
 
 ## Firmware
 
-- open MicrotikAPI/MicrotikAPI.ino in arduino ide
-- install Raspberry Pi Pico by earlephilhower using board manager
-- set target board as Waveshare RP2040 Zero
-- install libraries
-- in file config.h
-	- set server[] to RouterBoard IP
-	- set AUTH_USER to user created in step 2.3
-	- set AUTH_PASSWD to user password in step 2.3
-	- set targetVariableValue to name of targeted rule
-- Compile and upload
+ - open MicrotikAPI/MicrotikAPI.ino in arduino ide
+ - install Raspberry Pi Pico by earlephilhower using board manager
+ - set target board as Waveshare RP2040 Zero
+ - install libraries
+ - in file config.h
+	- set `server[]` to RouterBoard IP
+	- set `AUTH_USER` to user created in step 2.3
+	- set `AUTH_PASSWD` to user password in step 2.3
+	- set `targetVariableValue` to name of targeted rule
+ - Power On the device or push RESET while holding BOOT button
+ - Compile and upload
 
 
-## V2
+## V2 ideas
 - use W5500-EVB-PICO
 - web interface
+- more gpio
+- OTA
+- stackable
+- more apis
 
