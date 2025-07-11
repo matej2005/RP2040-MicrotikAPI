@@ -1,9 +1,12 @@
 #include <ArduinoHttpClient.h>
 #include <Arduino_JSON.h>
+#include <Base64.h>
 
 HttpClient _HttpClient = HttpClient(client, server, port);
 int statusCode;
 String response;
+
+String authBase64;
 
 void sendToApiState(bool state) {
   setStatus(INFO);
@@ -42,7 +45,8 @@ void sendToApiState(bool state) {
 
     _HttpClient.beginRequest();
     _HttpClient.patch(URL_PATH + ID);
-    _HttpClient.sendHeader("Authorization", "Basic YXBpOjEyMzQ=");
+    //_HttpClient.sendHeader("Authorization", "Basic YXBpOjEyMzQ=");
+    _HttpClient.sendHeader("Authorization", "Basic " + authBase64);
     _HttpClient.sendHeader(HTTP_HEADER_CONTENT_TYPE, contentType);
     _HttpClient.sendHeader(HTTP_HEADER_CONTENT_LENGTH, postData.length());
     _HttpClient.print(postData);
@@ -88,4 +92,19 @@ String parseResponse(String response) {
     }
   }
   return "null";
+}
+
+
+void prepareAuth() {
+
+  String authString = AUTH_USER + ":" + AUTH_PASSWD;
+
+  unsigned int authCharLength = authString.length() + 1;
+  char authChar[authCharLength];
+  authString.toCharArray(authChar, authCharLength);
+
+  unsigned int encodedLength = Base64.encodedLength(strlen(authChar));
+  char encodedString[encodedLength + 1];
+  Base64.encode(encodedString, authChar, authCharLength - 1);
+  authBase64 = (String)encodedString;
 }
