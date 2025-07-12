@@ -30,6 +30,7 @@
 #warning "Code is intended to run on RP2040 architecture or Waveshare RP2040 Zero board"
 #endif
 
+#define VERSION "1.0.1"
 
 // Initialize the Ethernet client library
 // with the IP address and port of the server
@@ -53,7 +54,7 @@ enum Status {
 
 void setup() {
   pinMode(INPUT_PIN, INPUT_PULLUP);
-  Ethernet.init(ETHERNET_CS_PIN);
+ // Ethernet.init(ETHERNET_CS_PIN);
   pixels.begin();  // INITIALIZE NeoPixel strip object (REQUIRED)
   pixels.clear();  // Set all pixel colors to 'off'
   pixels.show();
@@ -63,10 +64,13 @@ void setup() {
 
   delay(5000);
 
-  Serial.print("Starting MicrotikAPI v1 07/10/2025 by Matěj Mrkva\nProject: https://github.com/matej2005/RP2040-MicrotikAPI\nURL: https://mars-engineers.cz/ \nemail: matej.mrkva@mars-engineers.cz\n");
-  
+  Serial.print(F("Starting MicrotikAPI " VERSION " from " __DATE__ " by Matěj Mrkva\nProject: https://github.com/matej2005/RP2040-MicrotikAPI\nURL: https://mars-engineers.cz/ \nemail: matej.mrkva@mars-engineers.cz\n---------------------------------------------------------\n"));
+
   prepareAuth();
   ethernetTryConnect();
+
+  updateEthStatus();
+  lastEthStatus = ethStatus;
 
   // give the Ethernet shield a second to initialize:
   delay(1000);
@@ -77,51 +81,56 @@ void loop() {
   if (currentMillis - lastMillis >= 1000) {
     lastMillis = currentMillis;
 
-    if (Ethernet.linkStatus() == LinkOFF) ethStatus = false;
-    if (Ethernet.linkStatus() == LinkON) ethStatus = true;
+    updateEthStatus();
 
     if (ethStatus != lastEthStatus) {
       lastEthStatus = ethStatus;
       if (ethStatus) {
-        Serial.println("Ethernet cable is connected.");
+        Serial.println("INFO: Ethernet cable is connected.");
         ethernetTryConnect();
       } else {
         setStatus(WARN);
-        Serial.println("Ethernet cable is not connected.");
+        Serial.println("INFO: Ethernet cable is not connected.");
       }
     }
-
-    inputState = digitalRead(INPUT_PIN);
-    if (inputState != lastInputState) {
-      lastInputState = inputState;
-      if (ethStatus) sendToApiState(inputState);
+    if (ethStatus) {
+      inputState = digitalRead(INPUT_PIN);
+      if (inputState != lastInputState) {
+        lastInputState = inputState;
+        sendToApiState(inputState);
+      }
     }
   }
 }
 
 void ethernetTryConnect() {
-  // start the Ethernet connection:
-  Serial.print("Initialize Ethernet with DHCP: ");
-  if (Ethernet.begin(mac) == 0) {
-    Serial.println("ERR\nFailed to configure Ethernet using DHCP");
-    // Check for Ethernet hardware present
-    if (Ethernet.hardwareStatus() == EthernetNoHardware) {
-      Serial.println("Ethernet shield was not found.  Sorry, can't run without hardware. :(");
-      setStatus(ERROR);
-      while (true) { delay(1); }  // do nothing, no point running without Ethernet hardware
-    }
-    if (Ethernet.linkStatus() == LinkOFF) {
-      Serial.println("Ethernet cable is not connected.");
-      setStatus(WARN);
-    }
-    // try to configure using IP address instead of DHCP:
-    Ethernet.begin(mac, ip, myDns);
+  Ethernet.init(ETHERNET_CS_PIN);
+  if (Ethernet.linkStatus() == LinkOFF) {
+    Serial.println("Ethernet cable is not connected.");
+    setStatus(WARN);
   } else {
-    Serial.print("assigned IP: ");
-    Serial.println(Ethernet.localIP());
-    inputState = digitalRead(INPUT_PIN);
-    sendToApiState(inputState);
-    setStatus(OK);
+    // start the Ethernet connection:
+    Serial.print("Initialize Ethernet with DHCP: ");
+    if (Ethernet.begin(mac) == 0) {
+      Serial.println("ERR\nFailed to configure Ethernet using DHCP");
+      // Check for Ethernet hardware present
+      if (Ethernet.hardwareStatus() == EthernetNoHardware) {
+        Serial.println("Ethernet shield was not found.  Sorry, can't run without hardware. :(");
+        setStatus(ERROR);
+        //while (true) { delay(1); }  // do nothing, no point running without Ethernet hardware
+        delay(10000);
+        ethernetTryConnect();
+      }
+      // try to configure using IP address instead of DHCP:
+      Ethernet.begin(mac, ip, myDns);
+    } else {
+      Serial.print("assigned IP: ");
+      Serial.println(Ethernet.localIP());
+      inputState = digitalRead(INPUT_PIN);
+      lastInputState = inputState;
+      sendToApiState(inputState);
+      setStatus(OK);
+    }
   }
 }
 
@@ -130,16 +139,16 @@ void setStatus(Status status) {
   pixels.clear();  // Set all pixel colors to 'off'
   switch (status) {
     case OK:
-      pixels.setPixelColor(0, pixels.Color(0, 100, 0));
+      pixels.setPixelColor(0, pixels.Color(0, 50, 0));
       break;
     case WARN:
-      pixels.setPixelColor(0, pixels.Color(127, 46, 0));
+      pixels.setPixelColor(0, pixels.Color(64, 23, 0));
       break;
     case INFO:
-      pixels.setPixelColor(0, pixels.Color(0, 0, 100));
+      pixels.setPixelColor(0, pixels.Color(0, 0, 50));
       break;
     case ERROR:
-      pixels.setPixelColor(0, pixels.Color(100, 0, 0));
+      pixels.setPixelColor(0, pixels.Color(50, 0, 0));
       break;
     case CLEAR:
       break;
@@ -147,3 +156,7 @@ void setStatus(Status status) {
   pixels.show();  // Send the updated pixel colors to the hardware.
 }
 
+void updateEthStatus() {
+  if (Ethernet.linkStatus() == LinkOFF) ethStatus = false;
+  if (Ethernet.linkStatus() == LinkON) ethStatus = true;
+}

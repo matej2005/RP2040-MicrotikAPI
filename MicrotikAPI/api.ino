@@ -21,7 +21,7 @@ void sendToApiState(bool state) {
   String ID;
 
   Serial.print("Making GET request at ");
-  Serial.println(server + URL_PATH);
+  Serial.print(server + URL_PATH);
 
   _HttpClient.beginRequest();
   _HttpClient.get(URL_PATH);
@@ -30,7 +30,7 @@ void sendToApiState(bool state) {
   statusCode = _HttpClient.responseStatusCode();
   response = _HttpClient.responseBody();
 
-  Serial.printf("Status code: %i\n", statusCode);
+  Serial.printf("\tStatus code: %i\n", statusCode);
 
 #ifdef DEBUG
   Serial.print("Response: ");
@@ -41,7 +41,7 @@ void sendToApiState(bool state) {
   if (ID != "null") {
     ID = "/" + ID;
     Serial.print("Making PATCH request at ");
-    Serial.println(server + URL_PATH + ID);
+    Serial.print(server + URL_PATH + ID);
 
     _HttpClient.beginRequest();
     _HttpClient.patch(URL_PATH + ID);
@@ -56,7 +56,7 @@ void sendToApiState(bool state) {
     statusCode = _HttpClient.responseStatusCode();
     response = _HttpClient.responseBody();
 
-    Serial.printf("Status code: %i\n", statusCode);
+    Serial.printf("\tStatus code: %i\n", statusCode);
     if (statusCode == 200) setStatus(OK);
     else setStatus(WARN);
 
