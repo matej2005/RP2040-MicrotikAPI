@@ -23,16 +23,16 @@ I 3D printed rackmount case for this project
 **Supported versions > RouterOS v7.1beta4**
  - Login in to your router using WinBox
  - Optional: Create Group API in `system/groups` with policy `write, rest-api, read, api`
- - In system/users create user for accessing via API with api group created before
+ - In `system/users` create user for accessing via API with api group created before
  - Optional reserve DHCP address for this device and add it under Allowed addresses
- - Make sure that in IP/Services WWW is enabled
+ - Make sure that in `IP/Services` WWW is enabled
  - Create firewall rule with some specific comment that we will be targeting ex:"GPIO controled port" 
 	
 Terminal
- - user/group/add name=test policy=read,write,api,rest-api comment="Group for rest-api"
- - user/add name=api password=1234 group=api comment="User for rest-api"
- - ip/service/enable www
- - ip/firewall/nat/add comment="GPIO controled port" ...
+ - `user/group/add name=test policy=read, write, api, rest-api comment="Group for rest-api"`
+ - `user/add name=api password=1234 group=api comment="User for rest-api"`
+ - `ip/service/enable www`
+ - `ip/firewall/nat/add comment="GPIO controled port"` ...
 
 ## Firmware
 
@@ -44,7 +44,7 @@ Terminal
 	- set `server[]` to RouterBoard IP
 	- set `AUTH_USER` to user created in step 2.3
 	- set `AUTH_PASSWD` to user password in step 2.3
-	- set `targetVariableValue` to name of targeted rule
+	- set `targetVariableValue` to comment of targeted rule
  - Power On the device or push RESET while holding BOOT button
  - Compile and upload
 
