@@ -48,6 +48,8 @@ Terminal
  - Power On the device or push RESET while holding BOOT button
  - Compile and upload
 
+[microtik rest-api doc](https://help.mikrotik.com/docs/spaces/ROS/pages/47579162/REST+API)
+
 
 ## V2 ideas
 - use W5500-EVB-PICO
