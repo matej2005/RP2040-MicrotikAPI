@@ -29,7 +29,7 @@
 #warning "Code is intended to run on RP2040 architecture or Waveshare RP2040 Zero board"
 #endif
 
-#define VERSION "1.0.1"
+#define VERSION "1.1.1"
 
 // Initialize the Ethernet client library
 // with the IP address and port of the server
