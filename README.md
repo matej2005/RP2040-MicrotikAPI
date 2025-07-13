@@ -6,8 +6,29 @@ Project is based on RP2040-zero dev board and W5500 ethernet module
 
 Powering via USB-C
 
+✅	- tested
+☑️ - it should work
+❔ - not tested
+❌ - not compatible
+⌚ - in progress
+
+| Board | Compatibility status |
+|--|--|
+| RP2040-zero + W5500 | ✅ |
+| RP2350-zero + W5500 | ❌ ⌚ |
+| W5500-EVB-Pico |❔ ☑️  |
+| W5500-EVB-Pico-PoE | ✅ | 
+| W55RP20-EVB-PICO | ❌ |
+| W6300-EVB-Pico | ❌ |
+| W6100-EVB-Pico | ❌ |
+| W5100S-EVB-Pico | ❌ |
+| W6300-EVB-Pico2| ❌ |
+| W6100-EVB-Pico2| ❌ | 
+| W5500-EVB-Pico2 | ❌ ⌚ |
+|W5100S-EVB-Pico2| ❌ |
+
 ## Building it
-Here is schematic how to connect ethernet module with RP2040
+Here is schematic how to connect ethernet module with RP2040-zero
 Sometimes it started happening that ethernet module can´t boot, it was happening most times with long USB cable. I fixed it by adding cappacitor to the 3.3V power line.
 ![Schematic](./img/Schematic.png)
 
@@ -18,6 +39,10 @@ I builded it on pice of protoboard
 ## Enclousure
 I 3D printed rackmount case for this project
 ![Enclousure](./img/case.jpg)
+
+## W5500-EVB-Pico
+Code is compatible with W5500-EVB-Pico board. This board combine raspberry pi pico and W5500 ethernet module.
+[W5500-EVB-PICO documentation](https://docs.wiznet.io/Product/iEthernet/W5500/w5500-evb-pico)
 
 ## RouterBoard configuration
 **Supported versions > RouterOS v7.1beta4**
@@ -38,7 +63,7 @@ Terminal
 
  - open MicrotikAPI/MicrotikAPI.ino in arduino ide
  - install Raspberry Pi Pico by earlephilhower using board manager
- - set target board as Waveshare RP2040 Zero
+ - set target board as Waveshare RP2040 Zero or WIZnet W5500-EVB-Pico based on your board
  - install libraries
  - in file config.h
 	- set `server[]` to RouterBoard IP
