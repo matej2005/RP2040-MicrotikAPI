@@ -25,11 +25,11 @@
 #include <Ethernet.h>
 #include "config.h"
 
-#ifndef ARDUINO_ARCH_RP2040
-#warning "Code is intended to run on RP2040 architecture or Waveshare RP2040 Zero board"
+#if ARDUINO_ARCH_RP2040 | ARDUINO_WAVESHARE_RP2040_ZERO | ARDUINO_WIZNET_5500_EVB_PICO | ARDUINO_WIZNET_5500_EVB_PICO2
+#warning "Code is intended to run on RP2040/RP2350 architecture or Waveshare RP2040 Zero or W5500-EVB-Pico* board"
 #endif
 
-#define VERSION "1.1.1"
+#define VERSION "1.1.0"
 
 // Initialize the Ethernet client library
 // with the IP address and port of the server
