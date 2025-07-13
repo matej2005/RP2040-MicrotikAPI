@@ -24,7 +24,7 @@ Powering via USB-C
 | W5100S-EVB-Pico | ❌ |
 | W6300-EVB-Pico2| ❌ |
 | W6100-EVB-Pico2| ❌ | 
-| W5500-EVB-Pico2 | ❌ ⌚ |
+| W5500-EVB-Pico2 | ☑️ |
 |W5100S-EVB-Pico2| ❌ |
 
 ## Building it
