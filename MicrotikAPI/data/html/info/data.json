@@ -1,0 +1,53 @@
+{
+    "INPUTS": [
+        {
+            "Id": 0,
+            "Enabled": false,
+            "Name": "test GP0",
+            "Comment": "test",
+            "Input": "GP0",
+            "Type": "1",
+            "Invert": false
+        },
+        {
+            "Id": 1,
+            "Enabled": true,
+            "Name": "test GP1",
+            "Comment": "test1",
+            "Input": "GP1",
+            "Type": "1",
+            "Invert": false
+        },
+        {
+            "Id": 2,
+            "Enabled": true,
+            "Name": "test GP2",
+            "Comment": "test2",
+            "Input": "GP2",
+            "Type": "1",
+            "Invert": false
+        }
+    ],
+    "RULES": [
+        {
+            "Id": 0,
+            "Enabled": true,
+            "Name": "test1 rules",
+            "Comment": "test1",
+            "Condicion": {},
+            "Output": "rest1"
+        }
+    ],
+    "OUTPUTS": [
+        {
+            "Id": 0,
+            "Enabled": true,
+            "Name": "rest1",
+            "Comment": "test",
+            "Type": "rest",
+            "Value": {
+                "url": "http://127.0.0.1:80/api/"
+            }
+        }
+    ]
+}

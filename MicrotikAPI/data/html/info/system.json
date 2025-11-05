@@ -1,0 +1,22 @@
+{
+    "Name": "Web_testing",
+    "Version": "1.0.0",
+    "DHCP":false,
+    "IP":"127.0.0.1",
+    "GATEWAY":"127.0.0.1",
+    "MASK":"255.0.0.0",
+    "StatusFlag": "n/a",
+    "CPU":"na",
+    "FLASH":"na",
+    "RAM":"na",
+    "MAC":"00:00:00:00:00:00",
+    "UUID":"0000000",
+    "Board": "noBoard",
+    "LinkStatus":"na",
+    "LinkSpeed":"na",
+    "OTAenable": false,
+    "NewFw": "1.0.1",
+    "Uptime": "na",
+    "WebPort": 80,
+    "Comment": "Testing system.json file"
+}

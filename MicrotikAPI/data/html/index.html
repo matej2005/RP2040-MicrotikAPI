@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="./style.css">
+    <script src="./popup.js"></script>
+    <script src="tab.js"></script>
+    <title>RouterOS deck config</title>
+</head>
+<body>
+    <div class="header">
+        <h2>RouterOS deck config</h2>
+        <div class="tabs">
+            <button class="tab-btn" onclick="openTab(event, 'Inputs')" id="defaultOpen">Inputs</button>
+            <button class="tab-btn" onclick="openTab(event, 'Rules')">Rules</button>
+            <button class="tab-btn" onclick="openTab(event, 'Outputs')">Outputs</button>
+            <button class="tab-btn" onclick="openTab(event, 'System')">System</button>
+        </div>
+    </div>
+    <div class="table-actions">
+        <button id="new-input">+ New</button>
+    </div>
+    <div class="page">
+        <table id="Inputs" class="config-table">
+            <thead>
+                <tr class="table-top">
+                    <td style="width: 20px;"><input type="checkbox"></td>
+                    <td style="width: 20px;">Id</td>
+                    <td style="width: 15px;"></td>
+                    <td>
+                        <div class="table-top-element">Name</div>
+                    </td>
+                    <td>
+                        <div class="table-top-element">Comment</div>
+                    </td>
+                    <td>
+                        <div class="table-top-element">Input</div>
+                    </td>
+                    <td>
+                        <div class="table-top-element">Type</div>
+                    </td>
+                    <td>
+                        <div class="table-top-element">Invert</div>
+                    </td>
+                </tr>
+            </thead>
+            <tbody id="inputsTable">
+            </tbody>
+        </table>
+        <table id="Rules" class="config-table">
+            <thead>
+                <tr class="table-top">
+                    <td style="width: 20px;"><input type="checkbox"></td>
+                    <td style="width: 20px;">Id</td>
+                    <td style="width: 15px;"></td>
+                    <td>Name</td>
+                    <td>Comment</td>
+                    <td>Output</td>
+                </tr>
+            </thead>
+            <tbody id="rulesTable">
+            </tbody>
+            <tr></tr>
+        </table>
+
+        <table id="Outputs" class="config-table">
+            <thead>
+                <tr class="table-top">
+                    <td style="width: 20px;"><input type="checkbox"></td>
+                    <td style="width: 20px;">Id</td>
+                    <td style="width: 15px;"></td>
+                    <td>Comment</td>
+                    <td>Name</td>
+                    <td>Type</td>
+                </tr>
+            </thead>
+            <tbody id="outputsTable">
+            </tbody>
+        </table>
+        <table id="System" class="config-table">
+            <thead>
+                <tr class="table-top">
+                    <td>Name</td>
+                    <td>Value</td>
+                </tr>
+            </thead>
+            <tbody id="systemTable">
+            </tbody>
+        </table>
+    </div>
+
+
+
+    <script>
+        // Get the element with id="defaultOpen" and click on it
+        document.getElementById("defaultOpen").click();
+
+        //first add an event listener for page load
+        document.addEventListener("DOMContentLoaded", get_json_data('info/data.json', append_json), false); // get_json_data is the function name that will fire on page load        
+        append_system();
+        //this function is in the event listener and will execute on page load
+        function get_json_data(url, f) {
+            //Build the XMLHttpRequest (aka AJAX Request)
+            xmlhttp = new XMLHttpRequest();
+            xmlhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {//when a good response is given do this
+                    var data = JSON.parse(this.responseText); // convert the response to a json object
+                    f(data);
+                    //append_json(data);// pass the json object to the append_json function
+                }
+            }
+            //set the request destination and type
+            xmlhttp.open("GET", url, true);
+            //set required headers for the request
+            xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            // send the request
+            xmlhttp.send(); // when the request completes it will execute the code in onreadystatechange section
+        }
+
+        function loadSelect(url, elementId, selectedValue) {
+            fetch(url)
+                .then(resp => resp.json())
+                .then(list => {
+                    const select = document.getElementById(elementId);
+                    select.innerHTML = ""; // vyčistí původní obsah
+                    list.forEach(item => {
+                        const opt = document.createElement("option");
+                        opt.value = item.Id || item.Name || item;
+                        opt.textContent = item.Name || item.Id || item;
+                        if (opt.value == selectedValue) opt.selected = true;
+                        select.appendChild(opt);
+                    });
+                })
+                .catch(err => {
+                    console.error(`Cannot load ${url}`, err);
+                    const select = document.getElementById(elementId);
+                    select.innerHTML = `<option value="${selectedValue}">${selectedValue}</option>`;
+                });
+        }
+
+        //this function appends the json data to the table 'gable'
+        function append_json(data) {
+            var InputsTable = document.getElementById('inputsTable');
+            var json_inputs = data.INPUTS;
+
+            json_inputs.forEach(function (object) {
+                var tr = document.createElement('tr');
+                tr.innerHTML += '<td><input type="checkbox"></td>' +
+                    '<td>' + object.Id + '</td >' +
+                    '<td>' + (object.Enabled ? '' : 'X') + '</td>' +
+                    '<td>' + object.Name + '</td>' +
+                    '<td>' + object.Comment + '</td>' +
+                    '<td>' + object.Input + '</td>' +
+                    '<td>' + object.Type + '</td>' +
+                    '<td>' + object.Invert + '</td>';
+                InputsTable.appendChild(tr);
+                tr.addEventListener("dblclick", function () {
+                    openPopup("Edit input", `
+                        <table>
+                            <tr>
+                                <td><label>Enabled</label></td>
+                                <td><input type="checkbox" id="edit-enable" ${object.Enable ? "checked" : ""}></td>
+                            </tr>
+                            <br>
+                            <tr>
+                                <td><label>ID:</label></td>
+                                <td><input type="number" id="edit-id" value="${object.Id}" disabled></td>
+                            </tr>
+                            <br>
+                            <tr>
+                                <td><label>Name:</label></td>
+                                <td><input type="text" id="edit-name" value="${object.Name}"></td>
+                            </tr>
+                            <br>
+                            <tr>
+                                <td><label>Comment:</label></td>
+                                <td><input type="text" id="edit-comment" value="${object.Comment}"></td>
+                            </tr>
+                            <br>
+                            <tr>
+                                <td><label>Input:</label></td>
+                                <td>
+                                    <select id="edit-input"></select>
+                                </td>
+                            </tr>
+                            <br>
+                            <tr>
+                                <td><label>Type:</label></td>
+                                <td><input type="text" id="edit-type" value="${object.Type}"></td>
+                            </tr>
+                            <br>
+                            <tr>
+                                <td><label>Invert:</label></td>
+                                <td><input type="checkbox" id="edit-invert" ${object.Invert ? "checked" : ""}></td>
+                            </tr>
+                        </table>
+                        <div style="text-align:right;">
+                            <button onclick="closePopup()">Cancel</button>
+                            <button id="save-btn">OK</button>
+                        </div>
+                    `);
+
+                    loadSelect('info/inputs.json', 'edit-input', object.Input);
+                    document.getElementById("save-btn").addEventListener("click", () => {
+                        const edited = {
+                            Id: object.Id,
+                            Enabled: document.getElementById("edit-enable").value,
+                            Name: document.getElementById("edit-name").value,
+                            Comment: document.getElementById("edit-comment").value,
+                            Input: document.getElementById("edit-input").value,
+                            Type: document.getElementById("edit-type").value,
+                            Invert: document.getElementById("edit-invert").checked
+                        };
+                        console.log("Edited data:", edited);
+                        closePopup();
+                        fetch('/update', { method: 'PATCH', body: JSON.stringify(edited) })
+                    });
+                });
+            });
+
+            var RulesTable = document.getElementById('rulesTable');
+            var json_rules = data.RULES;
+            json_rules.forEach(function (object) {
+                var tr = document.createElement('tr');
+                tr.innerHTML += '<td><input type="checkbox"></td>' +
+                    '<td>' + object.Id + '</td>' +
+                    '<td>' + (object.Enabled ? '' : 'X') + '</td>' +
+                    '<td>' + object.Name + '</td>' +
+                    '<td>' + object.Comment + '</td>' +
+                    '<td>' + object.Output + '</td>';
+                RulesTable.appendChild(tr);
+                tr.addEventListener("dblclick", function () {
+                    openPopup("Edit input", `
+                        <table>
+                            <tr>
+                                <td><label>Enabled</label></td>
+                                <td><input type="checkbox" id="edit-enable" ${object.Enable ? "checked" : ""}></td>
+                            </tr>
+                            <br>
+                            <tr>
+                                <td><label>ID:</label></td>
+                                <td><input type="number" id="edit-id" value="${object.Id}" disabled></td>
+                            </tr>
+                            <br>
+                            <tr>
+                                <td><label>Name:</label></td>
+                                <td><input type="text" id="edit-name" value="${object.Name}"></td>
+                            </tr>
+                            <br>
+                            <tr>
+                                <td><label>Comment:</label></td>
+                                <td><input type="text" id="edit-comment" value="${object.Comment}"></td>
+                            </tr>
+                            <br>
+                            <tr>
+                                <td><label>Output:</label></td>
+                                <td><input type="text" id="edit-output" value="${object.Output}"></td>
+                            </tr>
+                        </table>
+                        <div style="text-align:right;">
+                            <button onclick="closePopup()">Cancel</button>
+                            <button id="save-btn">OK</button>
+                        </div>
+                    `);
+                    document.getElementById("save-btn").addEventListener("click", () => {
+                        const edited = {
+                            Id: object.Id,
+                            Enabled: document.getElementById("edit-enable").value,
+                            Name: document.getElementById("edit-name").value,
+                            Comment: document.getElementById("edit-comment").value,
+                            Input: document.getElementById("edit-input").value,
+                            Type: document.getElementById("edit-type").value,
+                            Invert: document.getElementById("edit-invert").checked
+                        };
+                        console.log("Edited data:", edited);
+                        closePopup();
+                        fetch('/update/data', { method: 'PATCH', body: JSON.stringify(edited) })
+                    });
+                });
+            });
+
+            var json_outputs = data.OUTPUTS;
+            var OutputsTable = document.getElementById('outputsTable');
+            json_outputs.forEach(function (object) {
+                var tr = document.createElement('tr');
+                tr.innerHTML += '<td><input type="checkbox"></td>' +
+                    '<td>' + object.Id + '</td>' +
+                    '<td>' + (object.Enabled ? '' : 'X') + '</td>' +
+                    '<td>' + object.Comment + '</td>' +
+                    '<td>' + object.Name + '</td>' +
+                    '<td>' + object.Type + '</td>';
+                OutputsTable.appendChild(tr);
+                tr.addEventListener("dblclick", function () {
+                    openPopup("Edit input", `
+                        <table>
+                            <tr>
+                                <td><label>Enabled</label></td>
+                                <td><input type="checkbox" id="edit-enable" ${object.Enable ? "checked" : ""}></td>
+                            </tr>
+                            <br>
+                            <tr>
+                                <td><label>ID:</label></td>
+                                <td><input type="number" id="edit-id" value="${object.Id}" disabled></td>
+                            </tr>
+                            <br>
+                            <tr>
+                                <td><label>Name:</label></td>
+                                <td><input type="text" id="edit-name" value="${object.Name}"></td>
+                            </tr>
+                            <br>
+                            <tr>
+                                <td><label>Comment:</label></td>
+                                <td><input type="text" id="edit-comment" value="${object.Comment}"></td>
+                            </tr>
+                            <br>
+                            <tr>
+                                <td><label>Type:</label></td>
+                                <td>
+                                    <select id="edit-type"></select>
+                                </td>
+                            </tr>
+                        </table>
+                        <div style="text-align:right;">
+                            <button onclick="closePopup()">Cancel</button>
+                            <button id="save-btn">OK</button>
+                        </div>
+                    `);
+                    loadSelect('info/output_types.json', 'edit-type', object.Input);
+                    document.getElementById("save-btn").addEventListener("click", () => {
+                        const edited = {
+                            Id: object.Id,
+                            Enabled: document.getElementById("edit-enable").value,
+                            Name: document.getElementById("edit-name").value,
+                            Comment: document.getElementById("edit-comment").value,
+                            Input: document.getElementById("edit-input").value,
+                            Type: document.getElementById("edit-type").value,
+                            Invert: document.getElementById("edit-invert").checked
+                        };
+                        console.log("Edited data:", edited);
+                        closePopup();
+                        fetch('/update/data', { method: 'PATCH', body: JSON.stringify(edited) })
+                    });
+                });
+            });
+        }
+
+    </script>
+    <!-- Popup container -->
+    <div id="popup" class="popup-overlay">
+        <div class="popup-window" id="popupWindow">
+            <div class="popup-header" id="popupHeader">
+                <span id="popupTitle">Detail</span>
+                <button onclick="closePopup()">✕</button>
+            </div>
+            <div class="popup-body" id="popupBody">
+                <!-- sem se vloží obsah -->
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
