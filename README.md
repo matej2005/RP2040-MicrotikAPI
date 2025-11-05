@@ -42,6 +42,7 @@ I 3D printed rackmount case for this project
 
 ## W5500-EVB-Pico
 Code is compatible with W5500-EVB-Pico board. This board combine raspberry pi pico and W5500 ethernet module.
+Led indication not working.
 [W5500-EVB-PICO documentation](https://docs.wiznet.io/Product/iEthernet/W5500/w5500-evb-pico)
 
 ## RouterBoard configuration
@@ -54,8 +55,8 @@ Code is compatible with W5500-EVB-Pico board. This board combine raspberry pi pi
  - Create firewall rule with some specific comment that we will be targeting ex:"GPIO controled port" 
 	
 Terminal
- - `user/group/add name=test policy=read, write, api, rest-api comment="Group for rest-api"`
- - `user/add name=api password=1234 group=api comment="User for rest-api"`
+ - `user/group/add name=routerOs-deck policy=read, write, api, rest-api comment="Group for roterOs-deck"`
+ - `user/add name=api password=1234 group=routerOs-deck comment="User for rest-api"`
  - `ip/service/enable www`
  - `ip/firewall/nat/add comment="GPIO controled port"` ...
 
