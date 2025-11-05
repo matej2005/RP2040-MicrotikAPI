@@ -2,11 +2,13 @@
 #include <Arduino_JSON.h>
 #include <Base64.h>
 
-HttpClient _HttpClient = HttpClient(client, server, port);
+HttpClient _HttpClient = HttpClient(client, serverIp, port);
 int statusCode;
 String response;
 
 String authBase64;
+String ID;
+String postData;
 
 void sendToApiState(bool state) {
   setStatus(INFO);
@@ -14,65 +16,66 @@ void sendToApiState(bool state) {
 
   String contentType = "application/json";
 
-  String postData = "{\"disabled\":\"";
+  postData = "{\"disabled\":\"";
   postData += (state ? "false" : "true");
   postData += "\"}";
 
-  String ID;
 
   Serial.print("Making GET request at ");
-  Serial.print(server + URL_PATH);
+  Serial.print(serverIp + URL_PATH);
 
   _HttpClient.beginRequest();
   _HttpClient.get(URL_PATH);
-  _HttpClient.sendHeader("Authorization", "Basic YXBpOjEyMzQ=");
+  _HttpClient.sendHeader("Authorization", "Basic " + authBase64);
   _HttpClient.endRequest();
   statusCode = _HttpClient.responseStatusCode();
   response = _HttpClient.responseBody();
-
-  Serial.printf("\tStatus code: %i\n", statusCode);
 
 #ifdef DEBUG
   Serial.print("Response: ");
   Serial.println(response);
 #endif
 
-  ID = parseResponse(response);
-  if (ID != "null") {
-    ID = "/" + ID;
-    Serial.print("Making PATCH request at ");
-    Serial.print(server + URL_PATH + ID);
+  Serial.printf("\tStatus code: %i\n", statusCode);
+  if (statusCode == 200) {
+    setStatus(OK);
+    ID = parseResponse(response);
+    if (ID != "null") {
+      ID = "/" + ID;
+      Serial.print("Making PATCH request at ");
+      Serial.print(serverIp + URL_PATH + ID);
 
-    _HttpClient.beginRequest();
-    _HttpClient.patch(URL_PATH + ID);
-    //_HttpClient.sendHeader("Authorization", "Basic YXBpOjEyMzQ=");
-    _HttpClient.sendHeader("Authorization", "Basic " + authBase64);
-    _HttpClient.sendHeader(HTTP_HEADER_CONTENT_TYPE, contentType);
-    _HttpClient.sendHeader(HTTP_HEADER_CONTENT_LENGTH, postData.length());
-    _HttpClient.print(postData);
-    _HttpClient.endRequest();
+      _HttpClient.beginRequest();
+      _HttpClient.patch(URL_PATH + ID);
+      //_HttpClient.sendHeader("Authorization", "Basic YXBpOjEyMzQ=");
+      _HttpClient.sendHeader("Authorization", "Basic " + authBase64);
+      _HttpClient.sendHeader(HTTP_HEADER_CONTENT_TYPE, contentType);
+      _HttpClient.sendHeader(HTTP_HEADER_CONTENT_LENGTH, postData.length());
+      _HttpClient.print(postData);
+      _HttpClient.endRequest();
 
-    // read the status code and body of the response
-    statusCode = _HttpClient.responseStatusCode();
-    response = _HttpClient.responseBody();
+      // read the status code and body of the response
+      statusCode = _HttpClient.responseStatusCode();
+      response = _HttpClient.responseBody();
 
-    Serial.printf("\tStatus code: %i\n", statusCode);
-    if (statusCode == 200) setStatus(OK);
-    else setStatus(WARN);
+      Serial.printf("\tStatus code: %i\n", statusCode);
+      if (statusCode == 200) setStatus(OK);
+      else setStatus(WARN);
 
 #ifdef DEBUG
-    Serial.print("Response: ");
-    Serial.println(response);
+      Serial.print("Response: ");
+      Serial.println(response);
 #endif
 
-  } else {
-    Serial.print("Cant find the variable: \"");
-    Serial.print(targetVariable);
-    Serial.print("\" with value: \"");
-    Serial.print(targetVariableValue);
-    Serial.print("\"\n");
-    setStatus(WARN);
-  }
+    } else {
+      Serial.print("Cant find the variable: \"");
+      Serial.print(targetVariable);
+      Serial.print("\" with value: \"");
+      Serial.print(targetVariableValue);
+      Serial.print("\"\n");
+      setStatus(WARN);
+    }
+  } else setStatus(WARN);
 }
 
 String parseResponse(String response) {
@@ -94,6 +97,30 @@ String parseResponse(String response) {
   return "null";
 }
 
+int apiRequest(RequestTypes type, char* server, String URL, String data) {
+
+  _HttpClient.beginRequest();
+  switch (type) {
+    case GET:
+      _HttpClient.get(URL);
+      break;
+    case PATCH:
+      _HttpClient.patch(URL_PATH + ID);
+      break;
+  }
+  _HttpClient.sendHeader("Authorization", "Basic " + authBase64);
+
+  if (type == PATCH) {
+    _HttpClient.sendHeader(HTTP_HEADER_CONTENT_TYPE, "application/json");
+    _HttpClient.sendHeader(HTTP_HEADER_CONTENT_LENGTH, postData.length());
+    _HttpClient.print(data);
+  }
+
+  _HttpClient.endRequest();
+
+
+  return 0;
+}
 
 void prepareAuth() {
 

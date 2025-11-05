@@ -13,7 +13,7 @@
  by Matěj Mrkva, based on work by Tom Igoe
 
 
-  Libraries needed:
+ Libraries needed:
     Adafruit NeoPixel by Adafruit
     Ethernet
     ArduinoHttpClient by Arduino
@@ -24,12 +24,29 @@
 #include <SPI.h>
 #include <Ethernet.h>
 #include "config.h"
+#include <VFS.h>
+#include <LittleFS.h>
+#include <Arduino_JSON.h>
 
-#if ARDUINO_ARCH_RP2040 | ARDUINO_WAVESHARE_RP2040_ZERO | ARDUINO_WIZNET_5500_EVB_PICO | ARDUINO_WIZNET_5500_EVB_PICO2
+
+#if !(ARDUINO_ARCH_RP2040 | ARDUINO_WAVESHARE_RP2040_ZERO | ARDUINO_WIZNET_5500_EVB_PICO | ARDUINO_WIZNET_5500_EVB_PICO2)
 #warning "Code is intended to run on RP2040/RP2350 architecture or Waveshare RP2040 Zero or W5500-EVB-Pico* board"
 #endif
 
 #define VERSION "1.1.0"
+
+
+#if (ARDUINO_ARCH_RP2040)
+#define CPU "RP2040"
+#else
+#if (PICO_RP2350A)
+#define CPU "RP2350"
+#else
+#define CPU "na"
+#endif
+#endif
+
+
 
 // Initialize the Ethernet client library
 // with the IP address and port of the server
@@ -54,36 +71,38 @@ enum Status {
   CLEAR
 };
 
+enum RequestTypes {
+  GET,
+  PATCH
+};
+
+
+
 void setup() {
   pinMode(INPUT_PIN, INPUT_PULLUP);
   // Ethernet.init(ETHERNET_CS_PIN);
-
-#ifdef PIN_NEOPIXEL
-  pixels.begin();  // INITIALIZE NeoPixel strip object (REQUIRED)
-  pixels.clear();  // Set all pixel colors to 'off'
-  pixels.show();
-#else
-  pinMode(PIN_LED, OUTPUT);
-#endif
-
+  setupStatus();
   // Open serial communications
   Serial.begin(115200);
 
   delay(5000);
 
-  Serial.print(F("Starting MicrotikAPI " VERSION " from " __DATE__ " by Matěj Mrkva\nProject: https://github.com/matej2005/RP2040-MicrotikAPI\nURL: https://mars-engineers.cz/ \nemail: matej.mrkva@mars-engineers.cz\n====================================================================================================\n"));
+  Serial.print(F("Starting RouterOs-deck " VERSION " from " __DATE__ " by Matěj Mrkva\nProject: https://github.com/matej2005/RP2040-MicrotikAPI\nURL: https://mars-engineers.cz/ \nemail: matej.mrkva@mars-engineers.cz\n====================================================================================================\n"));
 
   prepareAuth();
-  ethernetTryConnect();
+  setupEthernet();
 
-  updateEthStatus();
-  lastEthStatus = ethStatus;
+  LittleFS.begin();
+  VFS.root(LittleFS);
 
+  setupHtml();
   // give the Ethernet shield a second to initialize:
   delay(1000);
 }
 
 void loop() {
+  loopHtml();
+
   currentMillis = millis();
   if (currentMillis - lastMillis >= 1000) {
     lastMillis = currentMillis;
@@ -108,90 +127,4 @@ void loop() {
       }
     }
   }
-}
-
-void ethernetTryConnect() {
-  Ethernet.init(ETHERNET_CS_PIN);
-  if (Ethernet.linkStatus() == LinkOFF) {
-    Serial.println("Ethernet cable is not connected.");
-    setStatus(WARN);
-  } else {
-    // start the Ethernet connection:
-    Serial.println("Initializing Ethernet.");
-    DHCP = Ethernet.begin(mac);
-    if (DHCP == 0) {
-      Serial.println("ERR\nFailed to configure Ethernet using DHCP");
-      // Check for Ethernet hardware present
-      if (Ethernet.hardwareStatus() == EthernetNoHardware) {
-        Serial.println("Ethernet shield was not found.  Sorry, can't run without hardware. :(");
-        setStatus(ERROR);
-        //while (true) { delay(1); }  // do nothing, no point running without Ethernet hardware
-        delay(10000);
-        ethernetTryConnect();
-      }
-      // try to configure using IP address instead of DHCP:
-      Ethernet.begin(mac, ip, myDns);
-    } else {
-      printNet();
-
-      inputState = digitalRead(INPUT_PIN);
-      lastInputState = inputState;
-      sendToApiState(inputState);
-      setStatus(OK);
-    }
-  }
-}
-
-Status currentStatus = CLEAR;
-
-void setStatus(Status status) {
-  currentStatus = status;
-#ifdef PIN_NEOPIXEL
-  pixels.clear();  // Set all pixel colors to 'off'
-  switch (status) {
-    case OK:
-      pixels.setPixelColor(0, pixels.Color(0, 50, 0));
-      break;
-    case WARN:
-      pixels.setPixelColor(0, pixels.Color(64, 23, 0));
-      break;
-    case INFO:
-      pixels.setPixelColor(0, pixels.Color(0, 0, 50));
-      break;
-    case ERROR:
-      pixels.setPixelColor(0, pixels.Color(50, 0, 0));
-      break;
-    case CLEAR:
-      break;
-  }
-  pixels.show();  // Send the updated pixel colors to the hardware.
-#else
-
-#endif
-}
-
-
-void updateEthStatus() {
-  if (Ethernet.linkStatus() == LinkOFF) ethStatus = false;
-  if (Ethernet.linkStatus() == LinkON) ethStatus = true;
-}
-
-void printNet() {
-  Serial.println("====================================================================================================");
-
-  Serial.print(" MicrotikAPI network configuration : ");
-  if (DHCP) Serial.println("DHCP");
-  else Serial.println("static");
-
-  Serial.print(" MAC\t\t: ");
-  Serial.printf("%02x:%02x:%02x:%02x:%02x:%02x\n", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-  Serial.print(" IP\t\t: ");
-  Serial.println(Ethernet.localIP());
-  Serial.print(" Subnet Mask\t: ");
-  Serial.println(Ethernet.subnetMask());
-  Serial.print(" Gateway\t: ");
-  Serial.println(Ethernet.gatewayIP());
-  Serial.print(" DNS\t\t: ");
-  Serial.println(Ethernet.dnsServerIP());
-  Serial.println("====================================================================================================");
 }
